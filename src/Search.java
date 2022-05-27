@@ -1,6 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class Search {
@@ -38,29 +36,111 @@ public class Search {
         return punct.contains(s);
     }
 
-    public String cleanToken(String token) throws Exception {
-       return "";
+    public String cleanToken(String token) throws Exception
+    {
+        int ii;
+        int jj;
+        int aa;
+        for (aa=0; aa<token.length();aa++)
+        {
+            char a;
+            a = token.charAt(aa);
+            if (isAlpha(Character.toString(a)))
+            {
+                break;
+            }
+        }
+        if (aa == token.length())
+        {
+            return "";
+        }
+        for (ii = 0; ii<token.length();ii++)
+        {
+            char a;
+            a = token.charAt(ii);
+            if (!isPunct(Character.toString(a)))
+            {
+                break;
+            }
+        }
+        for (jj = token.length()-1; jj>=0;jj--)
+        {
+            char a;
+            a = token.charAt(jj);
+            if (!isPunct(Character.toString(a)))
+            {
+                break;
+            }
+        }
+        String s = token.substring(ii,jj+1);
+       return s.toLowerCase();
     }
 
     public Map<String, Set<String>> getIndex() {
         return index;
     }
 
-    public Set<String> gatherTokens(String bodyText) throws Exception {
+    public Set<String> gatherTokens(String bodyText) throws Exception
+    {
         Set<String> words = new HashSet<>();
-
+        String[] s = bodyText.split(" ");
+        for (int ii = 0; ii<s.length;ii++)
+        {
+            String a = cleanToken(s[ii]);
+            if (a != "")
+            {
+                words.add(a);
+            }
+        }
         return words;
     }
 
-    public int buildIndex(String filename) throws Exception {
-        return 0;
+    public int buildIndex(String filename) throws Exception
+    {
+        BufferedReader reader;
+        reader = new BufferedReader(new FileReader(filename));
+        String url = reader.readLine();
+        String lru;
+        int numPages = 0;
+        while (url != null) {
+            numPages++;
+            System.out.println(url);
+             lru = reader.readLine();
+             Set<String> rlu = gatherTokens(lru);
+             String[] a = rlu.toArray(new String[0]);
+             for (int ii = 0; ii<a.length; ii++)
+             {
+                 if (index.containsKey(a[ii]))
+                 {
+                     Set<String> b = index.get(a[ii]);
+                     b.add(url);
+                 }
+                 else
+                 {
+                     Set<String> c = new HashSet<>();
+                     c.add(url);
+                     index.put(a[ii],c);
+                 }
+             }
+            url = reader.readLine();
+        }
+        reader.close();
+
+        return numPages;
     }
 
-    public Set<String> findQueryMatches(String query) {
+    public Set<String> findQueryMatches(String query)
+    {
         Set<String> sites = new HashSet<>();
-
-
+        if (index.containsKey(query))
+        {
+            sites = index.get(query);
+        }
         return sites;
+    }
+    public int numWords()
+    {
+        return index.size();
     }
 
 
